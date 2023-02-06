@@ -1,13 +1,10 @@
-import dbConnect from "../../lib/mongodb"
-import User from "../../models/user"
+import { PrismaClient, users } from '@prisma/client'
+import {NextApiRequest, NextApiResponse} from "next"
 
-export default async (req:any, res:any) => {
-  await dbConnect()
+const prisma = new PrismaClient()
 
-  try {
-    const users = await User.find({})
-    res.json(users)
-  } catch (e) {
-    console.log(e)
-  }
+const handler = async (req:NextApiRequest,res:NextApiResponse) => {
+  const allUsers:users[] = await prisma.users.findMany()
+  res.json(allUsers)
 }
+export default handler
