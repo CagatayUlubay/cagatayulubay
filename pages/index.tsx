@@ -4,7 +4,6 @@ import fetcher from "../lib/fetcher"
 import poster from "../lib/poster"
 import {users} from "@prisma/client"
 import {signIn, signOut, useSession} from "next-auth/react";
-import type {MenuProps} from 'antd'
 import {Layout, Menu, theme, Breadcrumb} from 'antd';
 import {useState} from "react";
 import {DesktopOutlined, LoginOutlined, LogoutOutlined} from "@ant-design/icons";
@@ -12,23 +11,7 @@ import type { ItemType } from 'antd/lib/menu/hooks/useItems';
 import Link from "next/link";
 const { Header, Content, Footer, Sider } = Layout;
 
-let newUserCreated = false
-
-type MenuItem = Required<MenuProps>
-
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[]
-): MenuItem {
-  return {
-    key,
-    icon,
-    children,
-    label
-  } as unknown as MenuItem
-}
+const instagramUrl = 'https://www.instagram.com/'
 
 let items: ItemType[] = [
   {
@@ -43,14 +26,14 @@ export const Index:React.FC = () => {
   const {trigger} = useSWRMutation('/api/users', poster)
   const {data: session} = useSession()
   const [collapsed, setCollapsed] = useState<boolean>(false)
+  const [newUserCreated, setNewUserCreated] = useState<boolean>(false)
 
-  if (error) return <div>Error..</div>
+  if (error) return <div>Es ist ein Fehler aufgetreten..</div>
 
   if (session) {
     if (!newUserCreated) {
       trigger({username: session.user?.name})
-      console.log(session, session.user?.name)
-      newUserCreated = true
+      setNewUserCreated(true)
     }
 
     items.push(
@@ -88,14 +71,14 @@ export const Index:React.FC = () => {
             <div>
             {session && (
               <>
-                Herzlich willkommen <strong><Link href={`https://www.instagram.com/${session.user?.name}`}>@{session.user?.name}</Link></strong>!
+                Herzlich willkommen <strong><Link href={`${instagramUrl}${session.user?.name}`}>@{session.user?.name}</Link></strong>!
 
                 <h1>Teilnehmende Nutzer</h1>
                 {isLoading && (
                   <div>Lade Liste...</div>
                 )}
                 {data && data.map((user:users) => {
-                  return <Link href={`https://www.instagram.com/${user.name}`} target={'_blank'}>@{user.name}</Link>
+                  return <div><Link href={`${instagramUrl}${user.name}`} target={'_blank'}>@{user.name}</Link></div>
                 })}
               </>
             )}
