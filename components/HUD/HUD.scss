@@ -1,0 +1,9 @@
+@import "../assets/css/bootstrap";
+
+$prefix = '.trs-hud'
+
+#{$prefix} {
+  &__container {
+    color: green;
+  }
+}

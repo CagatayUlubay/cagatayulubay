@@ -1,5 +1,6 @@
 import {SessionProvider} from "next-auth/react"
 import {Component, ComponentProps} from "react"
+import './_app.scss'
 
 type Props = {
   Component: any,
