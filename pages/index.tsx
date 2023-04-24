@@ -1,97 +1,36 @@
 import useSWR from "swr"
-import useSWRMutation from "swr/mutation"
 import fetcher from "../lib/fetcher"
-import poster from "../lib/poster"
 import {users} from "@prisma/client"
-import {signIn, signOut, useSession} from "next-auth/react";
-import {Layout, Menu, theme, Breadcrumb} from 'antd';
-import {useState} from "react";
-import {DesktopOutlined, LoginOutlined, LogoutOutlined} from "@ant-design/icons";
-import type { ItemType } from 'antd/lib/menu/hooks/useItems';
-import Link from "next/link";
-const { Header, Content, Footer, Sider } = Layout;
+import {useSession} from "next-auth/react"
+import Link from "next/link"
 
 const instagramUrl = 'https://www.instagram.com/'
 
-let items: ItemType[] = [
-  {
-    key: 'home',
-    icon: <DesktopOutlined/>,
-    label: 'Übersicht'
-  },
-]
-
 export const Index:React.FC = () => {
-  const {data, error, isLoading} = useSWR('/api/users', fetcher)
-  const {trigger} = useSWRMutation('/api/users', poster)
+  const {data, isLoading} = useSWR('/api/users', fetcher)
   const {data: session} = useSession()
-  const [collapsed, setCollapsed] = useState<boolean>(false)
-  const [newUserCreated, setNewUserCreated] = useState<boolean>(false)
-
-  if (error) return <div>Es ist ein Fehler aufgetreten..</div>
-
-  if (session) {
-    if (!newUserCreated) {
-      trigger({username: session.user?.name})
-      setNewUserCreated(true)
-    }
-
-    items.push(
-      {
-        key: 'logout',
-        icon: <LogoutOutlined />,
-        label: 'Abmelden',
-        onClick: () => {signOut()}
-      }
-    )
-  } else {
-    items.push(
-      {
-        key: 'login',
-        icon: <LoginOutlined />,
-        label: 'Anmelden',
-        onClick: () => {signIn()}
-      }
-    )
-  }
 
   return (
-    <>
-      <Layout style={{minHeight: '100vh'}}>
-        <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
-          <div>{`{LOGO}`}</div>
-          <Menu theme={"dark"} mode={"inline"} defaultSelectedKeys={['home']} items={items} />
-        </Sider>
-        <Layout className={"site-layout"}>
-          <Content style={{ margin: '0 16px'}}>
-            <Breadcrumb style={{ margin: '16px 0'}}>
-              <Breadcrumb.Item>Start</Breadcrumb.Item>
-              <Breadcrumb.Item>Übersicht</Breadcrumb.Item>
-            </Breadcrumb>
-            <div>
-            {session && (
-              <>
-                Herzlich willkommen <strong><Link href={`${instagramUrl}${session.user?.name}`}>@{session.user?.name}</Link></strong>!
+    <div>
+      {session && (
+        <>
+          Herzlich willkommen <strong><Link href={`${instagramUrl}${session.user?.name}`}>@{session.user?.name}</Link></strong>!
 
-                <h1>Teilnehmende Nutzer</h1>
-                {isLoading && (
-                  <div>Lade Liste...</div>
-                )}
-                {data && data.map((user:users) => {
-                  return <div><Link href={`${instagramUrl}${user.name}`} target={'_blank'}>@{user.name}</Link></div>
-                })}
-              </>
-            )}
-              {!session && (
-                <>
-                  Melden dich an, um fortzufahren!
-                </>
-              )}
-            </div>
-          </Content>
-        </Layout>
-      </Layout>
-    </>
+          <h1>Teilnehmende Nutzer</h1>
+          {isLoading && (
+            <div>Lade Liste...</div>
+          )}
+          {data && data.map((user:users, key:number) => {
+            return <div key={key}><Link href={`${instagramUrl}${user.name}`} target={'_blank'}>@{user.name}</Link></div>
+          })}
+        </>
+      )}
+      {!session && (
+        <>
+          Melden dich an, um fortzufahren!
+        </>
+      )}
+    </div>
   )
 }
 
